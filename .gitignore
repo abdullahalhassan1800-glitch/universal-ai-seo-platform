@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+dist/
+build/
+
+# Env & secrets
+.env
+.env.local
+.env*.local
+*.pem
+
+# Node
+node_modules/
+.next/
+out/
+frontend/.env
+frontend/.env.local
+frontend/dist/
+npm-debug.log*
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Playwright
+playwright-report/
+test-results/
+
+# SQLite dev db
+*.db
+*.sqlite3
+

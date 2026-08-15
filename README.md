@@ -1,0 +1,67 @@
+# Universal AI SEO Platform
+
+Multi search-engine SEO intelligence platform. Crawls websites, runs universal technical SEO audits, scores pages 0–100 across 8 dimensions, clusters keywords, prioritizes fixes with AI, and connects to real search-engine APIs (Google Search Console, Bing, Brave) — never fabricating metrics.
+
+## Stack
+
+- **Backend**: FastAPI + SQLAlchemy 2.0 + PostgreSQL/SQLite (SQLite out of the box)
+- **Crawler**: httpx (optional Playwright JS rendering), robots.txt + sitemap aware
+- **AI**: pluggable — NVIDIA Nemotron, OpenAI, Google Gemini, Ollama; rule-based fallback when unconfigured
+- **Frontend**: React 18 + Vite + Tailwind CSS 4
+- **Search engines**: Google (GSC), Bing, Yandex, Brave, DuckDuckGo, Yahoo adapters
+
+## Quick start
+
+```bash
+# Backend
+python -m venv .venv
+.venv\Scripts\activate            # Windows
+pip install -r requirements.txt
+python -m backend.app.cli init-db
+uvicorn backend.app.main:app --reload --port 8000
+
+# Frontend (separate terminal)
+cd frontend
+npm install
+npm run dev                        # http://localhost:3000
+```
+
+- API docs: http://localhost:8000/docs
+- Frontend: http://localhost:3000
+
+## Configuration
+
+Copy `.env.example` to `.env` and fill in values. Everything is optional:
+
+| Variable | Purpose |
+|---|---|
+| `DATABASE_URL` | PostgreSQL (e.g. Supabase) or SQLite default |
+| `AI_PROVIDER` | `nvidia` \| `openai` \| `gemini` \| `ollama` \| `none` |
+| `GSC_CLIENT_ID/…` | Google Search Console OAuth |
+| `BING_API_KEY` | Bing Webmaster API |
+| `BRAVE_API_KEY` | Brave SERP analysis |
+| `CRAWLER_RENDER` | `httpx` (fast) or `playwright` (JS rendering) |
+
+`frontend/.env.example` → `frontend/.env` sets `VITE_API_URL` when deploying the frontend separately.
+
+## Key endpoints
+
+```
+POST /api/auth/register | /login
+GET  /api/dashboard
+GET/POST /api/websites
+POST /api/websites/{id}/crawl
+GET  /api/websites/{id}/score | /issues | /pages | /tasks
+POST /api/websites/{id}/keywords | /clusters | /serp
+GET  /api/engines
+```
+
+## Project layout
+
+```
+backend/app/    FastAPI app (core, models, schemas, api, services)
+crawler/        robots, sitemap, fetcher, parser, analyzer, scorer
+ai/             provider abstraction + prompts
+search_engines/ adapter interface + per-engine connectors
+frontend/       React SPA
+```

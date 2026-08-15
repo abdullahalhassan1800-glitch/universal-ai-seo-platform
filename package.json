@@ -1,0 +1,12 @@
+{
+  "name": "universal-ai-seo-platform",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Universal AI SEO SaaS Platform - monorepo scripts",
+  "scripts": {
+    "dev:frontend": "npm --prefix frontend run dev",
+    "dev:backend": "uvicorn backend.app.main:app --reload --port 8000",
+    "test": "pytest",
+    "setup": "python -m pip install -r requirements.txt && pip install -e ."
+  }
+}
