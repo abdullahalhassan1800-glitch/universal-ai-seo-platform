@@ -72,6 +72,10 @@ def _run_job(job_id: str, max_pages: int | None, delay: float | None, render: st
 def _persist(db: Session, job: CrawlJob, website: Website, result) -> None:
     from crawler.analyzer import Issue
 
+    from ..services.ai_service import enrich_issues_with_ai
+
+    result.issues = enrich_issues_with_ai(result.issues)
+
     job.pages_crawled = len(result.pages)
     job.skipped_by_robots = result.skipped_by_robots
     job.errors = result.errors or None
