@@ -23,7 +23,12 @@ services:
         sync: false
         comment: Frontend URL, e.g. https://universal-ai-seo-platform.vercel.app
       - key: AI_PROVIDER
-        value: none
+        value: nvidia
+      - key: AI_MODEL
+        value: nvidia/llama-3.3-nemotron-super-49b-v1
+      - key: NVIDIA_API_KEY
+        sync: false
+        comment: Add your NVIDIA build.nvidia.com API key (nvapi-...)
       - key: CRAWLER_RENDER
         value: httpx
       - key: CRAWLER_MAX_PAGES
