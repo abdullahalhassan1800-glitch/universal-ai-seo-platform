@@ -10,6 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .api import auth, crawl, dashboard, keywords, search_engines, tasks, websites, workspaces
 from .core.config import settings
+from .services.ai_service import get_provider
 
 app = FastAPI(
     title=settings.app_name,
@@ -48,3 +49,25 @@ def health():
 @app.get("/", tags=["system"])
 def root():
     return {"name": settings.app_name, "docs": "/docs", "health": "/health"}
+
+
+@app.get("/api/ai/status", tags=["system"])
+def ai_status():
+    import os
+
+    provider = get_provider()
+    live = None
+    if provider.name != "unavailable":
+        try:
+            live = provider.generate("Reply with exactly: OK")[:80]
+        except Exception as exc:  # noqa: BLE001
+            live = f"ERROR: {exc}"
+    return {
+        "ai_provider_env": os.environ.get("AI_PROVIDER", ""),
+        "ai_model_env": os.environ.get("AI_MODEL", ""),
+        "nvidia_key_set": bool(os.environ.get("NVIDIA_API_KEY")),
+        "openai_key_set": bool(os.environ.get("OPENAI_API_KEY")),
+        "gemini_key_set": bool(os.environ.get("GEMINI_API_KEY")),
+        "resolved_provider": provider.name,
+        "live_test": live,
+    }
