@@ -51,6 +51,7 @@ async function request(path, { method = "GET", body, params } = {}) {
 }
 
 export const api = {
+  _baseUrl: BASE_URL,
   get: (path, opts) => request(path, { ...opts, method: "GET" }),
   post: (path, body, opts) => request(path, { ...opts, method: "POST", body }),
   patch: (path, body, opts) => request(path, { ...opts, method: "PATCH", body }),

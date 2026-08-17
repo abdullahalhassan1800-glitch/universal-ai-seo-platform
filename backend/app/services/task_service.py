@@ -44,8 +44,6 @@ def tasks_from_issues(db: Session, website_id) -> list[SeoTask]:
         if issue_name in existing:
             continue
         priority = _group_priority(group)
-        if priority in ("MEDIUM", "LOW"):
-            continue
         template = TASK_TEMPLATE.get(issue_name, "Resolve this SEO issue.")
         count = len(group)
         description = f"{issue_name}: {count} page(s) affected. {template}" if count > 1 else f"{issue_name}. {template}"

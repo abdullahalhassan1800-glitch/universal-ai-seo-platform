@@ -109,6 +109,32 @@ export default function Audit() {
     }
   };
 
+  const downloadReport = () => {
+    if (!websiteId) return;
+    const token = localStorage.getItem("token") || "";
+    const url = `${api._baseUrl || ""}/api/websites/${websiteId}/report`;
+    fetch(url, { headers: { Authorization: `Bearer ${token}` } })
+      .then((r) => {
+        if (!r.ok) throw new Error("Report generation failed");
+        return r.blob();
+      })
+      .then((blob) => {
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = `seo-report-${websiteId}.html`;
+        a.click();
+        URL.revokeObjectURL(a.href);
+      })
+      .catch((e) => setError(e.message));
+  };
+
+  const viewReport = () => {
+    if (!websiteId) return;
+    const token = localStorage.getItem("token") || "";
+    const url = `${api._baseUrl || ""}/api/websites/${websiteId}/report`;
+    window.open(`${url}?token=${token}`, "_blank");
+  };
+
   if (loading) return <Spinner />;
 
   const isRunning = job && ["queued", "running"].includes(job.status);
@@ -142,6 +168,12 @@ export default function Audit() {
           </Button>
           <Button onClick={generateTasks} disabled={!websiteId} className="bg-slate-700 hover:bg-slate-800">
             Generate Tasks
+          </Button>
+          <Button onClick={viewReport} disabled={!websiteId || !score} className="bg-blue-600 hover:bg-blue-700">
+            View Report
+          </Button>
+          <Button onClick={downloadReport} disabled={!websiteId || !score} className="bg-emerald-600 hover:bg-emerald-700">
+            Download Report
           </Button>
         </div>
       </div>
