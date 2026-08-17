@@ -131,8 +131,8 @@ export default function Audit() {
   const viewReport = () => {
     if (!websiteId) return;
     const token = localStorage.getItem("token") || "";
-    const url = `${api._baseUrl || ""}/api/websites/${websiteId}/report`;
-    window.open(`${url}?token=${token}`, "_blank");
+    const url = `${api._baseUrl || ""}/api/websites/${websiteId}/report?token=${token}`;
+    window.open(url, "_blank");
   };
 
   if (loading) return <Spinner />;
