@@ -110,6 +110,7 @@ class CrawlJob(UUIDPkMixin, TimestampMixin, Base):
     status: Mapped[str] = mapped_column(String(20), default="queued")  # queued|running|completed|failed
     started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    max_pages: Mapped[int] = mapped_column(Integer, default=100)
     pages_crawled: Mapped[int] = mapped_column(Integer, default=0)
     skipped_by_robots: Mapped[int] = mapped_column(Integer, default=0)
     errors: Mapped[list | None] = mapped_column(JSON, nullable=True)

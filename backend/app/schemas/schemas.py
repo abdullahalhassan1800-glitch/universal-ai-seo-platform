@@ -96,6 +96,7 @@ class CrawlJobOut(ORMModel):
     status: str
     started_at: datetime | None
     finished_at: datetime | None
+    max_pages: int
     pages_crawled: int
     skipped_by_robots: int
     errors: list | None

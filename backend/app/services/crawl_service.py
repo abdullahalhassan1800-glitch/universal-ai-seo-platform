@@ -18,7 +18,8 @@ from ..models import CrawlJob, CrawlResult, Page, SeoIssue, Website
 
 def start_crawl(website: Website, max_pages: int | None = None, delay: float | None = None,
                 render: str | None = None) -> CrawlJob:
-    job = CrawlJob(website_id=website.id, status="queued")
+    effective_max = max_pages or settings.crawler_max_pages
+    job = CrawlJob(website_id=website.id, status="queued", max_pages=effective_max)
     db = SessionLocal()
     try:
         db.add(job)

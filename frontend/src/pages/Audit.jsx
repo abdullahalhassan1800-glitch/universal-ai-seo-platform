@@ -3,6 +3,86 @@ import { useSearchParams } from "react-router-dom";
 import { api } from "../api/client";
 import { Alert, Button, Card, ScoreRing, SeverityBadge, Spinner } from "../components/ui";
 
+function ProgressBar({ current, total, status }) {
+  const pct = total > 0 ? Math.min(100, Math.round((current / total) * 100)) : 0;
+  const isActive = status === "queued" || status === "running";
+  return (
+    <Card className="overflow-hidden border-blue-100">
+      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4">
+        <div className="flex items-center justify-between text-white">
+          <div className="flex items-center gap-3">
+            {isActive && (
+              <span className="relative flex h-3 w-3">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-75" />
+                <span className="relative inline-flex h-3 w-3 rounded-full bg-white" />
+              </span>
+            )}
+            <span className="text-sm font-semibold">
+              {status === "queued" && "Queued — waiting to start..."}
+              {status === "running" && `Crawling... ${current} of ${total} pages`}
+              {status === "completed" && `Crawl complete — ${current} pages crawled`}
+              {status === "failed" && "Crawl failed"}
+            </span>
+          </div>
+          <span className="text-2xl font-bold">{pct}%</span>
+        </div>
+      </div>
+      <div className="h-3 bg-slate-100">
+        <div
+          className={`h-full transition-all duration-500 ease-out ${
+            status === "failed"
+              ? "bg-red-500"
+              : status === "completed"
+              ? "bg-emerald-500"
+              : "bg-gradient-to-r from-blue-500 to-indigo-500"
+          } ${isActive ? "animate-pulse" : ""}`}
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+      {isActive && (
+        <div className="px-6 py-3 bg-blue-50/50 flex items-center gap-2">
+          <div className="flex gap-1">
+            {[0, 1, 2].map((i) => (
+              <span
+                key={i}
+                className="inline-block h-2 w-2 rounded-full bg-blue-400"
+                style={{ animation: `bounce 1.4s infinite ${i * 0.16}s` }}
+              />
+            ))}
+          </div>
+          <span className="text-xs text-blue-600">
+            Analyzing pages and detecting SEO issues...
+          </span>
+        </div>
+      )}
+    </Card>
+  );
+}
+
+function DimensionBar({ label, value, max = 100 }) {
+  const pct = value != null ? Math.min(100, Math.max(0, value)) : 0;
+  const color =
+    pct >= 80 ? "#16a34a" : pct >= 60 ? "#ca8a04" : pct >= 40 ? "#ea580c" : "#dc2626";
+  return (
+    <div className="mb-3">
+      <div className="flex items-center justify-between mb-1">
+        <span className="text-xs font-medium text-slate-600 capitalize">
+          {label.replace(/_/g, " ")}
+        </span>
+        <span className="text-xs font-bold" style={{ color }}>
+          {value != null ? value : "—"}
+        </span>
+      </div>
+      <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+        <div
+          className="h-full rounded-full transition-all duration-700 ease-out"
+          style={{ width: `${pct}%`, backgroundColor: color }}
+        />
+      </div>
+    </div>
+  );
+}
+
 export default function Audit() {
   const [params] = useSearchParams();
   const [websites, setWebsites] = useState([]);
@@ -139,9 +219,17 @@ export default function Audit() {
 
   const isRunning = job && ["queued", "running"].includes(job.status);
   const dims = score?.dimensions || {};
+  const dimEntries = Object.entries(dims).filter(([, v]) => v != null);
 
   return (
     <div className="space-y-6">
+      <style>{`
+        @keyframes bounce {
+          0%, 80%, 100% { transform: translateY(0); }
+          40% { transform: translateY(-6px); }
+        }
+      `}</style>
+
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-800">Audit</h1>
@@ -155,7 +243,7 @@ export default function Audit() {
               onChange={(e) => setWebsiteId(e.target.value)}
               className="w-64 rounded-lg border border-slate-300 px-3 py-2 text-sm"
             >
-              <option value="">Select…</option>
+              <option value="">Select...</option>
               {websites.map((w) => (
                 <option key={w.id} value={w.id}>
                   {w.name} ({w.domain})
@@ -164,7 +252,7 @@ export default function Audit() {
             </select>
           </div>
           <Button onClick={startCrawl} disabled={!websiteId || isRunning || crawling}>
-            {isRunning ? "Crawling…" : "Start Crawl"}
+            {isRunning ? "Crawling..." : "Start Crawl"}
           </Button>
           <Button onClick={generateTasks} disabled={!websiteId} className="bg-slate-700 hover:bg-slate-800">
             Generate Tasks
@@ -191,14 +279,29 @@ export default function Audit() {
         </Card>
       ) : (
         <>
+          {isRunning ? (
+            <ProgressBar
+              current={job?.pages_crawled || 0}
+              total={job?.max_pages || 100}
+              status={job?.status}
+            />
+          ) : null}
+
+          {job && job.status === "completed" ? (
+            <ProgressBar
+              current={job.pages_crawled || 0}
+              total={job.max_pages || 100}
+              status="completed"
+            />
+          ) : null}
+
           <div className="grid gap-4 md:grid-cols-3">
             <Card className="flex items-center gap-6 p-6">
               <ScoreRing value={score?.universal_seo_score ?? null} size={100} />
               <div>
                 <div className="text-sm font-semibold text-slate-700">Universal SEO Score</div>
                 <div className="mt-1 text-xs text-slate-400">
-                  {job ? `Job: ${job.status}` : "No audit yet"}
-                  {job ? ` · ${job.pages_crawled} pages` : ""}
+                  {job ? `${job.pages_crawled} pages crawled` : "No audit yet"}
                 </div>
               </div>
             </Card>
@@ -220,17 +323,15 @@ export default function Audit() {
               </div>
             </Card>
             <Card className="p-6">
-              <h2 className="mb-3 text-sm font-semibold text-slate-700">Dimension scores</h2>
-              <div className="space-y-2">
-                {Object.entries(dims).map(([k, v]) => (
-                  <div key={k} className="flex items-center justify-between text-sm">
-                    <span className="text-slate-500">{k.replace(/_/g, " ")}</span>
-                    <span className="font-semibold">{v ?? "—"}</span>
-                  </div>
-                ))}
-                {Object.keys(dims).length === 0 ? (
+              <h2 className="mb-3 text-sm font-semibold text-slate-700">Dimension Scores</h2>
+              <div className="space-y-0">
+                {dimEntries.length > 0 ? (
+                  dimEntries.map(([k, v]) => (
+                    <DimensionBar key={k} label={k} value={v} />
+                  ))
+                ) : (
                   <p className="text-sm text-slate-400">No scores yet.</p>
-                ) : null}
+                )}
               </div>
             </Card>
           </div>
